@@ -1,0 +1,59 @@
+:root {
+  color-scheme: light;
+  --bg: #eef2f5;
+  --panel: #ffffff;
+  --ink: #17202a;
+  --muted: #647480;
+  --line: #d9e1e8;
+  --line-strong: #b9c6d1;
+  --accent: #0f766e;
+  --accent-soft: #e3f2f0;
+  --accent-ink: #0b5d57;
+  --warning: #b45309;
+  --warning-soft: #fff2dc;
+  --danger: #b91c1c;
+  --danger-soft: #fdecec;
+  --code-bg: #f5f7f9;
+  --shadow: 0 1px 2px rgba(24, 39, 55, 0.06),
+    0 8px 24px rgba(24, 39, 55, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "PingFang SC",
+    "Microsoft YaHei",
+    sans-serif;
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+button,
+select,
+textarea,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+textarea {
+  resize: vertical;
+}
