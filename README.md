@@ -11,6 +11,31 @@ The tool was built from a one-sentence request and is intended as a short, verif
 - Vercel deployment support
 - Safe Markdown rendering with `react-markdown` and no raw HTML rehydration
 
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Client["Browser (Next.js)"]
+        UI[page.tsx<br/>paste diff + preferences]
+    end
+    subgraph Server["Server-only route"]
+        API[app/api/generate/route.ts]
+        RL[rate-limit.ts<br/>per-IP token bucket]
+        LLM[lib/deepseek.ts<br/>DeepSeek API client]
+        PARSE[lib/parse.ts<br/>zod schema validation]
+    end
+    UI -->|POST /api/generate| API
+    API --> RL --> LLM
+    LLM -->|JSON completion| PARSE
+    PARSE -->|validated result| UI
+    DB[(DeepSeek<br/>Chat Completions)] <-.-> LLM
+```
+
+- `app/api/generate/route.ts` — validates input with zod, enforces per-IP rate limits, and returns typed errors (`400`/`429`/`500`/`502`).
+- `lib/deepseek.ts` — the only place `DEEPSEEK_API_KEY` is read; server-only, never bundled into the client.
+- `lib/parse.ts` — parses the model's JSON output and re-validates it against a zod schema before it is trusted.
+- `lib/prompt.ts` — prompt hardening: treats input diffs/notes as inert untrusted text and instructs the model not to echo credentials.
+
 ## Features
 
 - Paste a `git diff`, commit messages, or change notes
@@ -74,9 +99,12 @@ The API key is read only inside `app/api/generate/route.ts` and is never bundled
 ## Verification
 
 ```bash
-npm run typecheck
-npm run build
+npm run typecheck   # TypeScript type check
+npm test            # unit tests (Vitest)
+npm run build       # production build
 ```
+
+Unit tests cover `lib/parse.ts` (JSON extraction and schema validation) and `lib/rate-limit.ts` (per-IP token bucket and window reset). CI (`.github/workflows/ci.yml`) runs typecheck, tests, and build on every push and pull request.
 
 The repo also contains [SECURITY.md](./SECURITY.md) documenting the review that was performed before deployment readiness, including boundaries and residual risks.
 
